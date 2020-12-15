@@ -1,0 +1,16 @@
+
+{% extends "base.html" %}            <!--  xxx base.html inserted here -->
+
+<!-- xxx fill in the missing codes -->
+
+{% block content %}                   <!-- # xxx block to be inserted in the base.html -->
+    <h1>Hi, {{ user.username }}!</h1>
+    {% for post in posts %}           <!-- # xxx for-loop -->
+    <div>
+        <p>{{ post.author.username }} says: 
+            <b>{{ post.body }}</b>
+        </p>
+    </div>
+    {% endfor %}                      <!-- # xxx end of for-loop -->
+{% endblock %}                        <!-- # xxx end of block -->              
+
