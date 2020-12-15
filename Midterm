@@ -1,0 +1,1103 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# CS 122-02:  Midterm Exam (Written) \n",
+    "* Oct 7, 2020\n",
+    "\n",
+    "\n",
+    "* Read instructions marked xxx\n",
+    "* Fill in the missing codes indicated by xxx\n",
+    "* You could add helper funcitons, but never delete any portion of this documents.\n",
+    "* Restart Kernel & Run All before your submission to \n",
+    "    * make sure your program does run throught without crash\n",
+    "\n",
+    "* Grading:\n",
+    "    * full credit if the program output is exactly as expected\n",
+    "    * 0 credit if the program output is obviously incorrect\n",
+    "    * partial credit may be given at will if the program output is close to\n",
+    "      the expected.\n",
+    "      \n",
+    "* Note that you will get 0 credits for this test if \n",
+    "    * your program does not compile \n",
+    "    * Your program crashes at any point\n",
+    "    * you delete any texts or codes"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# A: Object-oriented programming\n",
+    "# Fruit Arithmetics\n",
+    "\n",
+    "Topics:\n",
+    "* Object-oriented programming\n",
+    "* Magic (dunder) methods (double underscored methods)\n",
+    "* __str__ vs __repr__\n",
+    "    * __str__ is a convenient string representation\n",
+    "    * __repr__ is a detailed string representation, can be used in the list\n",
+    "* overloaded operators with the dunder's\n",
+    "* use lambda funcitons as the keys to sort, min, and max \n",
+    "* getter and setter methods\n",
+    "* format method\n",
+    "* list comprehensions"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 51,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import copy\n",
+    "class Fruit:\n",
+    "    def __init__(self, oz=1, unit_price = 1, color=None):\n",
+    "        self.__oz = oz\n",
+    "        self.__unit_price = unit_price\n",
+    "        self.__color = color\n",
+    "\n",
+    "    def __add__(self,k):\n",
+    "        \"\"\"overload operator + when self is the 1st operand\n",
+    "           if k is just a number, return an object x with x.__oz = self.__oz + k\n",
+    "           if k and self are the same type, return an object x with x.__oz = self.__oz + k.__oz \n",
+    "           otherwise, return None\n",
+    "        \"\"\"\n",
+    "        x = None\n",
+    "        if self.__class__ == k.__class__: # if k and self are the same type\n",
+    "            x = copy.deepcopy(self) # Deepcopy self to x (to prevent other fields from changing)\n",
+    "            x.__oz = self.__oz + k.__oz  # return an object x with x.__oz = self.__oz + k.__oz \n",
+    "        elif k.__class__ == int: # if k is just a number\n",
+    "            x = copy.deepcopy(self) # Deepcopy self to x (to prevent other fields from changing)\n",
+    "            x.__oz = self.__oz + k # return an object x with x.__oz = self.__oz + k\n",
+    "        return x # Add should return a new object, not modify the passed in object. For that, we use deepcopy.\n",
+    "    \n",
+    "    def __radd__(self,k): # Similar to: __rmul(self,k)__\n",
+    "        \"\"\"overload + when self is the 2nd operand \"\"\"\n",
+    "        return self.__add__(k) # Addition is commutative (doesn't matter whether on right or left)\n",
+    "      \n",
+    "    def __iadd__(self,k):\n",
+    "        \"\"\"overload += \n",
+    "           if k is just a number, return an object x with x.__oz += k\n",
+    "           if k and self are the same type, return an object x with x.__oz +=k.__oz \n",
+    "           otherwise, return None\n",
+    "        \"\"\"\n",
+    "        if self.__class__ == k.__class__: # if k and self are the same type\n",
+    "            self.__oz += k.oz # return an object x with x.__oz +=k.__oz \n",
+    "        elif k.__class__ == int: # if k is just a number\n",
+    "            self.__oz += k # return an object x with x.__oz += k\n",
+    "        return self # __iadd__ should modify the object, se we don't copy or deepcopy it\n",
+    "         \n",
+    "    def __imul__(self,k):\n",
+    "        \"\"\"overload *= \n",
+    "           if k is just a number, return an object x with x.__oz *= k\n",
+    "           if k and self are the same type, return an object x with x.__oz *=k.__oz \n",
+    "           otherwise, return None\n",
+    "        \"\"\"        \n",
+    "        if self.__class__ == k.__class__: # if k and self are the same typ\n",
+    "            self.__oz *= k.oz # return an object x with x.__oz *=k.__oz\n",
+    "        elif k.__class__ == int: # if k is just a number\n",
+    "            self.__oz *= k # return an object x with x.__oz *= k\n",
+    "        return self # __imul__ should modify the object, se we don't copy or deepcopy it\n",
+    "  \n",
+    "    def __mul__(self,k): # Similar to __add__\n",
+    "        x = None\n",
+    "        if self.__class__ == k.__class__: # if k and self are the same type\n",
+    "            x = copy.deepcopy(self) # Deepcopy self to x (to prevent other fields from changing)\n",
+    "            x.__oz *= k.__oz # return an object x with x.__oz *=k.__oz\n",
+    "        elif k.__class__ == int: # if k is just a number\n",
+    "            x = copy.deepcopy(self) # Deepcopy self to x (to prevent other fields from changing)\n",
+    "            x.__oz *= k # return an object x with x.__oz *= k\n",
+    "        return x # Mul should return a new object, not modify the passed in object. For that, we use deepcopy.\n",
+    "\n",
+    "    def __rmul__(self,k):\n",
+    "        return self.__mul__(k) # Multiplication is commutative (doesn't matter whether on right or left)\n",
+    "    \n",
+    "    # xxx: implement the getter method for self.__oz\n",
+    "    @property\n",
+    "    def oz (self):\n",
+    "        return self.__oz\n",
+    "    \n",
+    "    def price(self):\n",
+    "        return self.oz* self.__unit_price\n",
+    "    \n",
+    "    # xxx: implement following   \n",
+    "    def __str__(self): # If price is less than 3 spaces, it is paddes to match given output \n",
+    "        return \"{0}: price={1:>3}, oz={2}, unit_price={3}\".format(self.__repr__(), self.price(), self.__oz, self.__unit_price)\n",
+    "\n",
+    "    @property\n",
+    "    def id(self):\n",
+    "        return 0\n",
+    "\n",
+    "    def __repr__(self):\n",
+    "        return \"{0:10}\".format(self.__class__.__name__ + str(self.id)) # Format in 10 spaces\n",
+    " \n",
+    "    \n",
+    "class Apple (Fruit):\n",
+    "    __count = 0  \n",
+    "    def __init__(self, oz=1, unit_price = 10, color=None):\n",
+    "        super().__init__(oz, unit_price, color) # Call the constructor of the parent class Fruit\n",
+    "        self.__id = self.__class__.__count \n",
+    "        self.__class__.__count += 1\n",
+    "\n",
+    "    @property\n",
+    "    def id(self): # Same as id getter in Fruit\n",
+    "        return self.__id\n",
+    "    \n",
+    "class Fuji (Apple):\n",
+    "    __count = 0\n",
+    "    def __init__(self, oz=1, unit_price = 20, color=\"RED\"):\n",
+    "        super().__init__(oz, unit_price, color) # Call the constructor of the parent class Apple\n",
+    "        self.__id = self.__class__.__count \n",
+    "        self.__class__.__count += 1\n",
+    "    \n",
+    "    # xxx: implement the getter method for id \n",
+    "    @property\n",
+    "    def id(self): # Same as id getter in Fruit\n",
+    "        return self.__id \n",
+    "    \n",
+    "class Orange (Fruit):\n",
+    "    __count = 0                 # class method\n",
+    "    def __init__(self, oz=1, unit_price = 3, color=None):\n",
+    "        super().__init__(oz, unit_price, color) # Call the constructor of the parent class Fruit\n",
+    "        self.__id = self.__class__.__count \n",
+    "        self.__class__.__count += 1\n",
+    "\n",
+    "    # xxx: implement the getter method for id\n",
+    "    @property\n",
+    "    def id(self): # Same as id getter in Fruit\n",
+    "        return self.__id"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Question 1.1 (5pt)"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "# xxx Test Case : test __str__\n",
+    "# The output has to be identical to the following except the id number after the fruit name\n",
+    "Apple0    : price= 10, oz=1, unit_price=10\n",
+    "Apple1    : price= 10, oz=1, unit_price=10\n",
+    "Apple2    : price= 10, oz=1, unit_price=10"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 52,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Apple0    : price= 10, oz=1, unit_price=10\n",
+      "Apple1    : price= 10, oz=1, unit_price=10\n",
+      "Apple2    : price= 10, oz=1, unit_price=10\n"
+     ]
+    }
+   ],
+   "source": [
+    "n = 3\n",
+    "v=[ Apple() for i in range(n)]\n",
+    "s=[print (x) for x in v]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Question 1.2 (5pt)"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "# xxx Test Case: test __repr__\n",
+    "# The output has to be identical to the following except the id number after the fruit name\n",
+    "[Apple6    , Apple7    , Apple8    ]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 53,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[Apple0    , Apple1    , Apple2    ]\n"
+     ]
+    }
+   ],
+   "source": [
+    "print (v)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Question 2 (10 pt)"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "# xxx Test Case: test __add__, __radd__, __iadd__\n",
+    "# The output has to be identical to the following except the id number after the fruit name\n",
+    "Fuji126   : price= 20, oz=1, unit_price=20\n",
+    "Fuji127   : price= 20, oz=1, unit_price=20\n",
+    "Fuji128   : price= 20, oz=1, unit_price=20\n",
+    "The total weight in oz is 3\n",
+    "\n",
+    "Add 3 oz to each\n",
+    "Fuji132   : price= 80, oz=4, unit_price=20\n",
+    "Fuji133   : price= 80, oz=4, unit_price=20\n",
+    "Fuji134   : price= 80, oz=4, unit_price=20\n",
+    "The total weight in oz is 12\n",
+    "\n",
+    "Add -3 oz to each\n",
+    "Fuji132   : price= 20, oz=1, unit_price=20\n",
+    "Fuji133   : price= 20, oz=1, unit_price=20\n",
+    "Fuji134   : price= 20, oz=1, unit_price=20\n",
+    "The total weight in oz is 3"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 54,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Fuji0     : price= 20, oz=1, unit_price=20\n",
+      "Fuji1     : price= 20, oz=1, unit_price=20\n",
+      "Fuji2     : price= 20, oz=1, unit_price=20\n",
+      "The total weight in oz is 3\n",
+      "\n",
+      "Add 3 oz to each\n",
+      "Fuji0     : price= 80, oz=4, unit_price=20\n",
+      "Fuji1     : price= 80, oz=4, unit_price=20\n",
+      "Fuji2     : price= 80, oz=4, unit_price=20\n",
+      "The total weight in oz is 12\n",
+      "\n",
+      "Add -3 oz to each\n",
+      "Fuji0     : price= 20, oz=1, unit_price=20\n",
+      "Fuji1     : price= 20, oz=1, unit_price=20\n",
+      "Fuji2     : price= 20, oz=1, unit_price=20\n",
+      "The total weight in oz is 3\n"
+     ]
+    }
+   ],
+   "source": [
+    "n = 3\n",
+    "v=[ Fuji() for i in range(n)]\n",
+    "total = sum (v)\n",
+    "[print(f) for f in v]\n",
+    "print (\"The total weight in oz is\", total.oz)\n",
+    "\n",
+    "\n",
+    "k=3\n",
+    "print (\"\\nAdd %d oz to each\"% k)\n",
+    "s=[ x+k for x in v]\n",
+    "total = sum (s)\n",
+    "[print(f) for f in s]\n",
+    "print (\"The total weight in oz is\", total.oz)\n",
+    "\n",
+    "\n",
+    "k=-3\n",
+    "print (\"\\nAdd %d oz to each\"% k)\n",
+    "for x in s:\n",
+    "    x += k\n",
+    "total = sum (s)\n",
+    "[print(f) for f in s]\n",
+    "print (\"The total weight in oz is\", total.oz)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Question 3 (10 pt)"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "# Question 3:\n",
+    "# xxx Test Case:  __rmul__, __mul__, __imul__\n",
+    "# The output has to be identical to the following except the id number after the fruit name\n",
+    "Fuji198   : price= 20, oz=1, unit_price=20\n",
+    "Fuji199   : price= 20, oz=1, unit_price=20\n",
+    "Fuji200   : price= 20, oz=1, unit_price=20\n",
+    "\n",
+    "Scale up the weight of each by 8 times:\n",
+    "Fuji204   : price=160, oz=8, unit_price=20\n",
+    "Fuji205   : price=160, oz=8, unit_price=20\n",
+    "Fuji206   : price=160, oz=8, unit_price=20"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 55,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Fuji3     : price= 20, oz=1, unit_price=20\n",
+      "Fuji4     : price= 20, oz=1, unit_price=20\n",
+      "Fuji5     : price= 20, oz=1, unit_price=20\n",
+      "\n",
+      "Scale up the weight of each by 8 times:\n",
+      "Fuji3     : price=160, oz=8, unit_price=20\n",
+      "Fuji4     : price=160, oz=8, unit_price=20\n",
+      "Fuji5     : price=160, oz=8, unit_price=20\n"
+     ]
+    }
+   ],
+   "source": [
+    "n = 3\n",
+    "v=[ Fuji() for i in range(n)]\n",
+    "s=[print (x) for x in v]\n",
+    "\n",
+    "k=2\n",
+    "print ()\n",
+    "print (\"Scale up the weight of each by %d times:\"% (k**3) ) \n",
+    "v=[ k*x for x in v ]\n",
+    "v=[ x*k for x in v ]\n",
+    "for x in v: x *= k\n",
+    "s=[print (x) for x in v]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Question 4 (10 pt)"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "# xxx Test Case: sort fruits by prices\n",
+    "# The output has to be identical to the following except the id number after the fruit name\n",
+    "Orange0   : price= 30, oz=10, unit_price=3\n",
+    "Orange1   : price= 30, oz=10, unit_price=3\n",
+    "Orange2   : price= 30, oz=10, unit_price=3\n",
+    "Apple6    : price=100, oz=10, unit_price=10\n",
+    "Apple7    : price=100, oz=10, unit_price=10\n",
+    "Apple8    : price=100, oz=10, unit_price=10\n",
+    "Apple9    : price=100, oz=10, unit_price=10\n",
+    "Fuji0     : price=200, oz=10, unit_price=20\n",
+    "Fuji1     : price=200, oz=10, unit_price=20\n",
+    "Fuji2     : price=200, oz=10, unit_price=20"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 56,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Orange0   : price= 30, oz=10, unit_price=3\n",
+      "Orange1   : price= 30, oz=10, unit_price=3\n",
+      "Orange2   : price= 30, oz=10, unit_price=3\n",
+      "Apple3    : price=100, oz=10, unit_price=10\n",
+      "Apple4    : price=100, oz=10, unit_price=10\n",
+      "Apple5    : price=100, oz=10, unit_price=10\n",
+      "Apple6    : price=100, oz=10, unit_price=10\n",
+      "Fuji6     : price=200, oz=10, unit_price=20\n",
+      "Fuji7     : price=200, oz=10, unit_price=20\n",
+      "Fuji8     : price=200, oz=10, unit_price=20\n"
+     ]
+    }
+   ],
+   "source": [
+    "n=10\n",
+    "f=[]\n",
+    "for i in range (n):\n",
+    "    if (i%3==0):\n",
+    "        x = Apple(oz=n)\n",
+    "    elif (i%3==1):\n",
+    "        x = Fuji(oz=n)\n",
+    "    else:\n",
+    "        x = Orange(oz=n)\n",
+    "    f.append(x)\n",
+    "\n",
+    "# sort by price\n",
+    "g = f[:]\n",
+    "\n",
+    "f.sort (key=Fruit.price )\n",
+    "s=[print (x) for x in f]\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Question 5 (5 pt)"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "# Question 5:\n",
+    "# xxx Test Case: sort fruit by __str__\n",
+    "# The output has to be identical to the following except the id number after the fruit name\n",
+    "Apple6    : price=100, oz=10, unit_price=10\n",
+    "Apple7    : price=100, oz=10, unit_price=10\n",
+    "Apple8    : price=100, oz=10, unit_price=10\n",
+    "Apple9    : price=100, oz=10, unit_price=10\n",
+    "Fuji0     : price=200, oz=10, unit_price=20\n",
+    "Fuji1     : price=200, oz=10, unit_price=20\n",
+    "Fuji2     : price=200, oz=10, unit_price=20\n",
+    "Orange0   : price= 30, oz=10, unit_price=3\n",
+    "Orange1   : price= 30, oz=10, unit_price=3\n",
+    "Orange2   : price= 30, oz=10, unit_price=3"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 57,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Apple3    : price=100, oz=10, unit_price=10\n",
+      "Apple4    : price=100, oz=10, unit_price=10\n",
+      "Apple5    : price=100, oz=10, unit_price=10\n",
+      "Apple6    : price=100, oz=10, unit_price=10\n",
+      "Fuji6     : price=200, oz=10, unit_price=20\n",
+      "Fuji7     : price=200, oz=10, unit_price=20\n",
+      "Fuji8     : price=200, oz=10, unit_price=20\n",
+      "Orange0   : price= 30, oz=10, unit_price=3\n",
+      "Orange1   : price= 30, oz=10, unit_price=3\n",
+      "Orange2   : price= 30, oz=10, unit_price=3\n"
+     ]
+    }
+   ],
+   "source": [
+    "g.sort (key=Fruit.__str__ )\n",
+    "s=[print (x) for x in g]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Question 6 (5 pt)"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "# Question 6:\n",
+    "# xxx Test Case: Count differnt kinds of fruits\n",
+    "# The output has to be identical to the following \n",
+    "There are 7 Apple(s)\n",
+    "There are 3 Orange(s)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 58,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "There are 7 Apple(s)\n",
+      "There are 3 Orange(s)\n"
+     ]
+    }
+   ],
+   "source": [
+    "g=f[:]\n",
+    "for name in [\"Apple\", \"Orange\"]:\n",
+    "      g = [x for x in f if x.__class__.__name__==name or x.__class__.__base__.__name__==name ]\n",
+    "      n = len(g)\n",
+    "      s = \"There are {:d} {:s}(s)\".format ( n, name)\n",
+    "      print (s)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# B: String operation\n",
+    "* Study the following codes for drawing isosceles in ascii \n",
+    "* The example show how to draw isosceles one after another\n",
+    "* You are required to draw isosceles side by side as shown below"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 59,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "class Isosceles:\n",
+    "    \"\"\"return a isosceles with height = n, width=2*n+1,   \"\"\"\n",
+    "    def __init__(self,n, fg=\"*\", bg=\" \", margin=0, border=0):\n",
+    "        self.__n = n\n",
+    "        self.__fg = fg               # foreground symbol\n",
+    "        self.__bg = bg               # background symbol\n",
+    "        self.__margin = margin       # number of spaces to the left edge of the screen \n",
+    "        self.__border = border       # layer of border spaces \n",
+    "        self.__lines = self.build()  # list of strings\n",
+    "\n",
+    "    def build (self):\n",
+    "        \"\"\"construct a list of strings for Isosceles\"\"\"\n",
+    "        fg = self.__fg\n",
+    "        bg = self.__bg\n",
+    "        \n",
+    "        n = self.__n\n",
+    "        x = 2*n-1\n",
+    "        s = []\n",
+    "        for i in range (n):\n",
+    "            t = (self.__fg*(2*i+1)).center (x, self.__bg)\n",
+    "            s.append (t) \n",
+    "        s = Isosceles.addBorder(s,bg,fg,self.__border)\n",
+    "        x = \" \"*(self.__margin)\n",
+    "        t = []\n",
+    "        for i in s:\n",
+    "            t.append ( x+i)\n",
+    "        return t\n",
+    "\n",
+    "    @property\n",
+    "    def lines (self):\n",
+    "        return self.__lines\n",
+    "        \n",
+    "    def __str__ (self):\n",
+    "        s= \"\"\n",
+    "        for r in self.lines:\n",
+    "            s +=  r +\"\\n\"\n",
+    "        return s\n",
+    "             \n",
+    "    @staticmethod \n",
+    "    def addRowBorder (m,i, row, bg, fg, border): # helpfer function for build()\n",
+    "        \"\"\"add border to a certain row in the Isosceles\"\"\"\n",
+    "        n = len (row)\n",
+    "        r = \"\"\n",
+    "        for j,x  in enumerate (row):\n",
+    "            if x==fg:\n",
+    "                if i<border or i>=m-border:\n",
+    "                    x = \"#\"\n",
+    "                else:\n",
+    "                    for k in range (1, border+1):\n",
+    "                        if (j-k >= 0 and row[j-k]==bg) or \\\n",
+    "                            (j+k < n and row[j+k]==bg):\n",
+    "                            x = \"#\"\n",
+    "                            break\n",
+    "            r += x\n",
+    "        return r\n",
+    "    @staticmethod\n",
+    "    def addBorder (s, bg, fg, border):\n",
+    "        \"\"\"add border spaces to the Isosceles\"\"\"\n",
+    "        ss = []\n",
+    "        m = len(s)\n",
+    "        for i,row in enumerate (s) :\n",
+    "            t = Isosceles.addRowBorder (m, i, row, bg, fg, border)\n",
+    "            ss.append (t)\n",
+    "        return ss "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 60,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "  *  \n",
+      " *** \n",
+      "*****\n",
+      "\n",
+      "                   #    \n",
+      "                  #*#   \n",
+      "                 #***#  \n",
+      "                #*****# \n",
+      "               #########\n",
+      "\n",
+      "                                    #      \n",
+      "                                   ###     \n",
+      "                                  ##*##    \n",
+      "                                 ##***##   \n",
+      "                                ##*****##  \n",
+      "                               ########### \n",
+      "                              #############\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Example: \n",
+    "# Instatiate a list of trees \n",
+    "A = [Isosceles(2*i+3, margin=i*15, border=i) for i in range(3) ]\n",
+    "B = [Isosceles(3*i+5, margin=i*15, border=i, bg=\".\") for i in range(3) ]\n",
+    "\n",
+    "# draw triangles in list A one after another\n",
+    "s=[ print (t) for t in A]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 61,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "....*....\n",
+      "...***...\n",
+      "..*****..\n",
+      ".*******.\n",
+      "*********\n",
+      "\n",
+      "               .......#.......\n",
+      "               ......#*#......\n",
+      "               .....#***#.....\n",
+      "               ....#*****#....\n",
+      "               ...#*******#...\n",
+      "               ..#*********#..\n",
+      "               .#***********#.\n",
+      "               ###############\n",
+      "\n",
+      "                              ..........#..........\n",
+      "                              .........###.........\n",
+      "                              ........##*##........\n",
+      "                              .......##***##.......\n",
+      "                              ......##*****##......\n",
+      "                              .....##*******##.....\n",
+      "                              ....##*********##....\n",
+      "                              ...##***********##...\n",
+      "                              ..##*************##..\n",
+      "                              .###################.\n",
+      "                              #####################\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "# draw triangles in list B one after another\n",
+    "s=[ print (t) for t in B]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Question 7.1 (5 pt)"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "# Question 7.1:\n",
+    "# xxx Add codes below to  \n",
+    "# xxx draw triangles in list A side by side as shown below\n",
+    "                                                                 #      \n",
+    "                                                                ###     \n",
+    "                        #                                      ##*##    \n",
+    "                       #*#                                    ##***##   \n",
+    "  *                   #***#                                  ##*****##  \n",
+    " ***                 #*****#                                ########### \n",
+    "*****               #########                              #############"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 62,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def triangles(triangleList):\n",
+    "    totalLines = [] # List of all the lines (as lists) of the triangles (Don't want to modify input list)\n",
+    "    output = []\n",
+    "    # Step 1: Add all lines to 1 list\n",
+    "    for i in triangleList: # Get the lines of each triangle (as list) in triangleList\n",
+    "        totalLines.append(i.lines) # Add/Append each list of line in i to totalLines\n",
+    "    # Step 2: Append spaces above to each line to make all lines the same height\n",
+    "    height = max(len(i) for i in totalLines) # Get the maximum hight of the triangles (length of tallest line)\n",
+    "    for i in totalLines:\n",
+    "        while(len(i) != height): # If the length of the list (same as the height of triangle) is less than max\n",
+    "            i.insert(0, \" \" * len(i[0])) # Pad each triangle list above with spaces to match max height\n",
+    "            # The number of paddes spaces in each line is equal to the length of the first line in the triangle list \n",
+    "    # Step 3: Combine all 3 triangles in 1 list and return\n",
+    "    for i in range(height): # For each line in the matrix (7 in our case)\n",
+    "        s = \"\" # Stores the complete line\n",
+    "        for j in range(len(totalLines)): # For each triangle\n",
+    "            s += totalLines[j][i] # Combine the jth lines of all the triangles into 1 line\n",
+    "        output.append(s) # Add line s to output\n",
+    "    return output # Return the complete matrix"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 48,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "                                                                 #      \n",
+      "                                                                ###     \n",
+      "                        #                                      ##*##    \n",
+      "                       #*#                                    ##***##   \n",
+      "  *                   #***#                                  ##*****##  \n",
+      " ***                 #*****#                                ########### \n",
+      "*****               #########                              #############\n"
+     ]
+    }
+   ],
+   "source": [
+    "trianglesA = triangles(A) # Make and store triangles: pass in list A\n",
+    "for t in trianglesA: # Print out all triangles\n",
+    "    print(t) # Print each line in matrix"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Question 7.2 (5 pt)"
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "# xxx Use the codes you added to draw triangles in list B side by side as shown below\n",
+    "# xxx \n",
+    "                                                                     ..........#..........\n",
+    "                                                                     .........###.........\n",
+    "                                                                     ........##*##........\n",
+    "                        .......#.......                              .......##***##.......\n",
+    "                        ......#*#......                              ......##*****##......\n",
+    "                        .....#***#.....                              .....##*******##.....\n",
+    "....*....               ....#*****#....                              ....##*********##....\n",
+    "...***...               ...#*******#...                              ...##***********##...\n",
+    "..*****..               ..#*********#..                              ..##*************##..\n",
+    ".*******.               .#***********#.                              .###################.\n",
+    "*********               ###############                              #####################"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 50,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "                                                                     ..........#..........\n",
+      "                                                                     .........###.........\n",
+      "                                                                     ........##*##........\n",
+      "                        .......#.......                              .......##***##.......\n",
+      "                        ......#*#......                              ......##*****##......\n",
+      "                        .....#***#.....                              .....##*******##.....\n",
+      "....*....               ....#*****#....                              ....##*********##....\n",
+      "...***...               ...#*******#...                              ...##***********##...\n",
+      "..*****..               ..#*********#..                              ..##*************##..\n",
+      ".*******.               .#***********#.                              .###################.\n",
+      "*********               ###############                              #####################\n"
+     ]
+    }
+   ],
+   "source": [
+    "trianglesB = triangles(B) # Make and store triangles: pass in list B\n",
+    "for t in trianglesB: # Print out all triangles\n",
+    "    print(t)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# C: Use Python Dictionary to ANALYZE A TEXT FILE"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Most common words:\n",
+      "('the', 14)\n",
+      "('i', 9)\n",
+      "('and', 9)\n",
+      "('of', 8)\n",
+      "('is', 7)\n",
+      "\n",
+      "Least common words:\n",
+      "0 ('call', 1)\n",
+      "1 ('ishmael', 1)\n",
+      "2 ('years', 1)\n",
+      "3 ('agonever', 1)\n",
+      "4 ('mind', 1)\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "{None}"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "punct = str.maketrans(\"\",  \"\", \"!.,:;-?\")\n",
+    "\n",
+    "def clean_line(line):\n",
+    "    \"\"\"changes case and removes punctuation\"\"\"\n",
+    "    # make all one case\n",
+    "    cleaned_line = line.lower()\n",
+    "\n",
+    "    # remove punctuation\n",
+    "    cleaned_line = cleaned_line.translate(punct)\n",
+    "    return cleaned_line\n",
+    "\n",
+    "\n",
+    "def get_words(line):\n",
+    "    \"\"\"splits line into words, and rejoins with newlines\"\"\"\n",
+    "    words = line.split()\n",
+    "    return \"\\n\".join(words) + \"\\n\"\n",
+    "\n",
+    "\n",
+    "with open(\"moby_01.txt\") as infile, open(\"moby_01_clean.txt\", \"w\") as outfile:\n",
+    "    for line in infile:\n",
+    "        cleaned_line = clean_line(line)\n",
+    "\n",
+    "        cleaned_words = get_words(cleaned_line)\n",
+    "\n",
+    "        # write all words for line\n",
+    "        outfile.write(cleaned_words)\n",
+    "\n",
+    "def count_words(words):\n",
+    "    \"\"\"takes list of cleaned words, returns count dictionary\"\"\"\n",
+    "    word_count = {}\n",
+    "    for word in moby_words:\n",
+    "        count = word_count.setdefault(word, 0)\n",
+    "        word_count[word] += 1\n",
+    "    return word_count\n",
+    "\n",
+    "\n",
+    "def word_stats(word_count):\n",
+    "    \"\"\"Takes word count dictionary and returns top and bottom five\n",
+    "  entries\"\"\"\n",
+    "    word_list = list(word_count.items())\n",
+    "    word_list.sort(key=lambda x: x[1])\n",
+    "    least_common = word_list[:5]\n",
+    "    most_common = word_list[-1:-6:-1]\n",
+    "    return most_common, least_common\n",
+    "\n",
+    "moby_words = []\n",
+    "with open('moby_01_clean.txt') as infile:\n",
+    "    for word in infile:\n",
+    "        if word.strip():\n",
+    "            moby_words.append(word.strip())\n",
+    "\n",
+    "word_count = count_words(moby_words)\n",
+    "\n",
+    "most, least = word_stats(word_count)\n",
+    "print(\"Most common words:\")\n",
+    "for w in most:\n",
+    "    print(w)\n",
+    "    \n",
+    "print(\"\\nLeast common words:\")\n",
+    "{print(i, w) for i, w in enumerate (least) } # use the set compreheson\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Question 8: (5pt) \n",
+    "* fill in the missing codes below"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "Total number of occurrences of words: 267\n",
+      "\n",
+      "Average occurrences of words: 1.5084745762711864\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"\\nTotal number of occurrences of words: \" + str(sum(word_count.values()))) # answer 267 \n",
+    "# Get dictionary values and count them, add the number of items, and convert the total to a string\n",
+    "# xxx use only only ONE statement to print out the Total number of occurrenes of  words:\n",
+    "# The expected output is shown below\n",
+    "# Total number of occurrences of words: 267\n",
+    "\n",
+    "print(\"\\nAverage occurrences of words: \" + str(sum(word_count.values()) / len(word_count.keys()))) # answer\n",
+    "# Get dictionary keys (which are less than values), add the number of values, convert the total to a string\n",
+    "# Divie the total number of words by the total number of keys to get the avg occurrences of a word\n",
+    "# xxx use only only ONE statement to print out the average number of occurrenes of words:\n",
+    "# The expected output is shown below\n",
+    "# Total number of occurrences of words: 1.5084745762711864"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# D: String Format"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Question 9 (5pt) "
+   ]
+  },
+  {
+   "cell_type": "raw",
+   "metadata": {},
+   "source": [
+    "# Question 9:\n",
+    "#xxx fill in the missing statement to print out the following 11-by-11 time table\n",
+    "#xxx the first operand and the produce  to be right aligned, and the 2nd has to be left-aligned\n",
+    "#xxx Your program output has be identical to the following\n",
+    "\n",
+    " 1*1 =  1  1*2 =  2  1*3 =  3  1*4 =  4  1*5 =  5  1*6 =  6  1*7 =  7  1*8 =  8  1*9 =  9  1*10= 10  1*11= 11 \n",
+    " 2*1 =  2  2*2 =  4  2*3 =  6  2*4 =  8  2*5 = 10  2*6 = 12  2*7 = 14  2*8 = 16  2*9 = 18  2*10= 20  2*11= 22 \n",
+    " 3*1 =  3  3*2 =  6  3*3 =  9  3*4 = 12  3*5 = 15  3*6 = 18  3*7 = 21  3*8 = 24  3*9 = 27  3*10= 30  3*11= 33 \n",
+    " 4*1 =  4  4*2 =  8  4*3 = 12  4*4 = 16  4*5 = 20  4*6 = 24  4*7 = 28  4*8 = 32  4*9 = 36  4*10= 40  4*11= 44 \n",
+    " 5*1 =  5  5*2 = 10  5*3 = 15  5*4 = 20  5*5 = 25  5*6 = 30  5*7 = 35  5*8 = 40  5*9 = 45  5*10= 50  5*11= 55 \n",
+    " 6*1 =  6  6*2 = 12  6*3 = 18  6*4 = 24  6*5 = 30  6*6 = 36  6*7 = 42  6*8 = 48  6*9 = 54  6*10= 60  6*11= 66 \n",
+    " 7*1 =  7  7*2 = 14  7*3 = 21  7*4 = 28  7*5 = 35  7*6 = 42  7*7 = 49  7*8 = 56  7*9 = 63  7*10= 70  7*11= 77 \n",
+    " 8*1 =  8  8*2 = 16  8*3 = 24  8*4 = 32  8*5 = 40  8*6 = 48  8*7 = 56  8*8 = 64  8*9 = 72  8*10= 80  8*11= 88 \n",
+    " 9*1 =  9  9*2 = 18  9*3 = 27  9*4 = 36  9*5 = 45  9*6 = 54  9*7 = 63  9*8 = 72  9*9 = 81  9*10= 90  9*11= 99 \n",
+    "10*1 = 10 10*2 = 20 10*3 = 30 10*4 = 40 10*5 = 50 10*6 = 60 10*7 = 70 10*8 = 80 10*9 = 90 10*10=100 10*11=110 \n",
+    "11*1 = 11 11*2 = 22 11*3 = 33 11*4 = 44 11*5 = 55 11*6 = 66 11*7 = 77 11*8 = 88 11*9 = 99 11*10=110 11*11=121"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 43,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      " 1*1 =  1  1*2 =  2  1*3 =  3  1*4 =  4  1*5 =  5  1*6 =  6  1*7 =  7  1*8 =  8  1*9 =  9  1*10= 10  1*11= 11 \n",
+      " 2*1 =  2  2*2 =  4  2*3 =  6  2*4 =  8  2*5 = 10  2*6 = 12  2*7 = 14  2*8 = 16  2*9 = 18  2*10= 20  2*11= 22 \n",
+      " 3*1 =  3  3*2 =  6  3*3 =  9  3*4 = 12  3*5 = 15  3*6 = 18  3*7 = 21  3*8 = 24  3*9 = 27  3*10= 30  3*11= 33 \n",
+      " 4*1 =  4  4*2 =  8  4*3 = 12  4*4 = 16  4*5 = 20  4*6 = 24  4*7 = 28  4*8 = 32  4*9 = 36  4*10= 40  4*11= 44 \n",
+      " 5*1 =  5  5*2 = 10  5*3 = 15  5*4 = 20  5*5 = 25  5*6 = 30  5*7 = 35  5*8 = 40  5*9 = 45  5*10= 50  5*11= 55 \n",
+      " 6*1 =  6  6*2 = 12  6*3 = 18  6*4 = 24  6*5 = 30  6*6 = 36  6*7 = 42  6*8 = 48  6*9 = 54  6*10= 60  6*11= 66 \n",
+      " 7*1 =  7  7*2 = 14  7*3 = 21  7*4 = 28  7*5 = 35  7*6 = 42  7*7 = 49  7*8 = 56  7*9 = 63  7*10= 70  7*11= 77 \n",
+      " 8*1 =  8  8*2 = 16  8*3 = 24  8*4 = 32  8*5 = 40  8*6 = 48  8*7 = 56  8*8 = 64  8*9 = 72  8*10= 80  8*11= 88 \n",
+      " 9*1 =  9  9*2 = 18  9*3 = 27  9*4 = 36  9*5 = 45  9*6 = 54  9*7 = 63  9*8 = 72  9*9 = 81  9*10= 90  9*11= 99 \n",
+      "10*1 = 10 10*2 = 20 10*3 = 30 10*4 = 40 10*5 = 50 10*6 = 60 10*7 = 70 10*8 = 80 10*9 = 90 10*10=100 10*11=110 \n",
+      "11*1 = 11 11*2 = 22 11*3 = 33 11*4 = 44 11*5 = 55 11*6 = 66 11*7 = 77 11*8 = 88 11*9 = 99 11*10=110 11*11=121 \n"
+     ]
+    }
+   ],
+   "source": [
+    "# Question 9\n",
+    "\n",
+    "n = 12\n",
+    "for i in range (1,n):\n",
+    "    s= \"\"\n",
+    "    for j in range (1, n):\n",
+    "        # xxx fill in one statment \n",
+    "        s += \"{0:2d}*{1:<2d}={2:3d} \".format(i, j, i*j) # hints: s +=  \"{...}*{...}={:...} \".format (...)\n",
+    "    print (s)\n",
+    "        "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.3"
+  },
+  "toc": {
+   "nav_menu": {},
+   "number_sections": true,
+   "sideBar": true,
+   "skip_h1_title": false,
+   "toc_cell": false,
+   "toc_position": {},
+   "toc_section_display": "block",
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
